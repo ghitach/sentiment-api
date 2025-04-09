@@ -3,7 +3,6 @@ from textblob import TextBlob
 import nltk
 import os
 
-# Télécharger les ressources nécessaires à TextBlob
 nltk.download('punkt')
 
 app = Flask(__name__)
@@ -14,15 +13,15 @@ def analyze_sentiment():
     commentaire = data.get("commentaire", "")
 
     try:
-        # Traduire en anglais pour une meilleure analyse
+        # Traduction automatique vers l’anglais
         commentaire_en = str(TextBlob(commentaire).translate(to="en"))
-    except:
-        # Si la traduction échoue, utiliser le texte brut
-        commentaire_en = commentaire
+    except Exception as e:
+        commentaire_en = commentaire  # fallback
 
     blob = TextBlob(commentaire_en)
     polarity = blob.sentiment.polarity
 
+    # Classification simple
     if polarity < -0.1:
         sentiment = "négatif"
     elif polarity <= 0.1:
@@ -32,6 +31,6 @@ def analyze_sentiment():
 
     return jsonify({"sentiment": sentiment})
 
-# Pour Render : utiliser le port fourni par la variable d'environnement
+# Port dynamique pour Render
 port = int(os.environ.get("PORT", 10000))
 app.run(host="0.0.0.0", port=port)
